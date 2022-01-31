@@ -35,12 +35,31 @@ print(weight_kg / ((height_cm/100) ^ 2))
 # @param w_kg numeric The person's weight in kg.
 # @param h_cm numeric The person's height in cm.
 # @return     numeric The person's BMI.
-bmi <- function(<...>, <...>) {
-    b <- w_kg / ((<...>) ^ 2)
-    return (<...>)
+bmi <- function(w_kg, h_cm) {
+    b <- w_kg / ((h_cm/100) ^ 2)
+    return (b)
 }
 print(bmi(weight_kg, height_cm))
 
+print("enter some custom bmis, -1 to quit")
+repeat{
+  w_kg <- readline(prompt="enter a weight in kg: ")
+  w_kg <- as.numeric(w_kg)
+  if (is.na(w_kg)){
+    stop("That weight was not a number!\n")
+  } else if (w_kg == -1) {
+    break
+  }
+  
+  h_cm <- readline(prompt="enter a height in cm: ")
+  h_cm <- as.numeric(h_cm)
+  if (is.na(h_cm)){
+    stop("That height was not a number!\n")
+  } else if (h_cm == -1) {
+    break
+  }
+  print(bmi(w_kg, h_cm))
+}
 # ------------------------------------------------------------------------------
 
 # Step 3. Sanity and error checks.
@@ -53,21 +72,23 @@ bmi <- function(w_kg, h_cm) {
     # Check and report errors with any of the input values.
     error <- NA
     b <- w_kg / ((h_cm / 100) ^ 2)
-    if (any(<...> < 2 | <...> > 650 | <...> < 50 | <...> > 280)) {
+    if (any(w_kg < 2 | w_kg > 650 | h_cm < 50 | h_cm > 280)) {
         error <- "bmi: inputs out of reasonable range."
-    } else if (<...>(<...> < 15 | <...> > 40)) {
+    } else if (any(b < 15 | b > 40)) {
         error <- "bmi: output out of expected range."
     }
     if (!is.na(error)) print(error)
     # We could also remove these bad data.
-    b[which(<...> < 2 | (<...> > 650 | <...> < 50 | <...> > 280))] <- NA
-    b[<...>(<...> < 15 | <...> > 40)] <- NA
+    b[which(w_kg < 2 | w_kg > 650 | h_cm < 50 | h_cm > 280)] <- NA
+    b[which(b < 15 | b > 40)] <- NA
     # Return the data
     return (b)
 }
 
 # Try several pairs of values to get the different responses from the function.
+# defining a basic vector is done with 'c'
 bmi(650, 100)
+bmi(c(250, 70, 100), c(270,170,150))
 
 # Step 3a. Testing code.
 # Create a list of the tests you think you need to do to check the function.
@@ -98,48 +119,54 @@ simple_bmi <- function(w_kg, h_cm) {
 
 head(starwars)
 sw <- starwars %>% 
-    select(name, gender, <...>, <...>) %>%
-    mutate(BMI=simple_bmi(<...>, <...>))
+    select(name, gender, height, mass) %>%
+    mutate(BMI=simple_bmi(mass, height))
 head(sw)
 
 # ------------------------------------------------------------------------------
 
 # Step 5. Create a boxplot of BMI. Create one separating by gender.
-boxplot(sw$<...>)
-boxplot(sw$<...> ~ <...>)
+boxplot(sw$BMI)
+#female <- sw %>% filter(gender=="feminine")
+#male <- sw[which(sw$gender=="masculine"), ]
+#boxplot(sw$BMI[sw$gender=="feminine"], sw$BMI[sw$gender=="masculine"])
+boxplot(sw$BMI ~ sw$gender)
 
 # Find the outlier.
-head(sw %>% <...>(BMI<...>100))
+head(sw %>% filter(BMI>=100))
 # Remove the outlier (and repeat the above lines).
-sw <- sw %>% <...>(BMI<...>100)
-boxplot(sw$<...> ~ <...>)
+sw <- sw %>% filter(BMI<100)
+boxplot(sw$BMI ~ sw$gender)
 
 # And, if we repeat this with the function that does the checking.
 sw <- starwars %>% 
     select(name, height, mass, gender) %>%
     mutate(BMI=bmi(mass, height))
-boxplot(<...> ~ <...>)
+boxplot(sw$BMI ~ sw$gender)
 
 # Step 5b. Create the cumulative distribution plot for the BMI values.
 # What extra information have we got here?
-plot(ecdf(sw$BMI[<...>=="feminine"]),
+plot(ecdf(sw$BMI[sw$gender=="feminine"]),
     main="CDF for BMI by gender",
     xlim=range(sw$BMI, na.rm=TRUE), 
     col="red")
-plot(ecdf(sw$BMI[<...>=="masculine"]), 
+plot(ecdf(sw$BMI[sw$gender=="masculine"]), 
     col="blue",
     add=TRUE)
 
 # Comparing the CDF and boxplot.
+# changing the plotting area to allow 2 graphs side by side
 par(mfrow=c(2,1))
-plot(ecdf(sw$BMI[<...>=="feminine"]),
+plot(ecdf(sw$BMI[sw$gender=="feminine"]),
     main="CDF for BMI by gender",
     xlim=range(sw$BMI, na.rm=TRUE), 
     col="red")
-plot(ecdf(sw$BMI[<...>=="masculine"]), 
+plot(ecdf(sw$BMI[sw$gender=="masculine"]), 
     col="blue",
     add=TRUE)
-boxplot(<...> ~ <...>, col=c("red", "blue"), horizontal=TRUE)
+boxplot(sw$BMI ~ sw$gender, col=c("red", "blue"), horizontal=TRUE)
+
+# return plotting area to 1 row and 1 column
 par(mfrow=c(1,1))
 
 # Step 5a. Outliers.

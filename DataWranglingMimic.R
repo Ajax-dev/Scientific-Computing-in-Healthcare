@@ -32,43 +32,46 @@ cat(red("\014\012PMIM102J Exercise - Wrangling\n--------------------------------
 ###admissions = read_csv(file="mimic-iii/admissions.csv")
     
 # Review the data file - what do you notice?
-head(admissions)
+#head(admissions)
 
 # Step 2.4. Open the files using a path variable.
 path <- 'mimic-iii'
 admissions <- read_csv(file=paste(path, 'admissions.csv', sep='/'))
-cptevents <- read_csv(file=paste(path, 'cptevents', sep='/'))
-patients <- read_csv(file=paste(path, 'patients', sep='/'))
-d_cpt <- read_csv(file=paste(path, 'd_cpt', sep='/'))
-chartevents <- read_csv(file=paste(path, 'chartevents', sep='/'))
+cptevents <- read_csv(file=paste(path, 'cptevents.csv', sep='/'))
+patients <- read_csv(file=paste(path, 'patients.csv', sep='/'))
+dict_cpt <- read_csv(file=paste(path, 'd_cpt.csv', sep='/'))
+chartevents <- read_csv(file=paste(path, 'chartevents.csv', sep='/'))
 
-head(admissions)
+##head(admissions)
 # removes row_id
-admissions <- admissions %>% select(-row_id)
-head(admissions)
+##admissions <- admissions %>% select(-row_id)
+##head(admissions)
 
 # Step 2.2. Load the cptevents data file.
-cptevents <- read_csv(file="mimic-iii/cptevents.csv")
+#cptevents <- read_csv(file="mimic-iii/cptevents.csv")
 
 
 
 # Review the data file - what do you notice?
-head(cptevents)
+##head(cptevents)
 
 # Step 2.3. Change column data types to the types you think are appropriate.
 # Check with as.tibble() or str().
+#as_tibble(cptevents)
+## says with 1569 more rows and 2 more variables
+#str(cptevents)
+## says is a tibble
 cptevents <- cptevents %>%
                 mutate(cpt_suffix=as.character(cpt_suffix))
-head(cptevents)
+###head(cptevents)
 
 # Extra note.
 # Can you see anything that might be worth simplifying about the file names?
 # Can you remember how we join strings together?
 
 
-
 # Step 2.5. Get the data dictionary.
-<...>
+###sample_n(dict_cpt, 10)
 
 # Leave step 2.6 out as an extra.
 # ...............................
@@ -95,38 +98,60 @@ head(cptevents)
 
 # Step 4. Extract relevant data.
 # ------------------------------------------------------------------------------
-<...>
+n_chartevents <- nrow(chartevents)
+cat('Chartevents has', n_chartevents, 'rows.\n')
 
 # Skip 4.1 as extra content.
 # ..........................
-# # Step 4.1. Improve this message to compare with what is expected.
-# # Note - what does length(chartevents) return?
-# n_chartevents <- nrow(chartevents)
+# Step 4.1. Improve this message to compare with what is expected.
+# Note - what does length(chartevents) return?
+n_chartevents <- nrow(chartevents)
 # # n_chartevents <- count(chartevents)[[1]]
-# E_CHARTEVENTS <- 758355
-# if (n_chartevents == E_CHARTEVENTS){
-#     cat(green(paste('Chartevent has the expected number (', E_CHARTEVENTS,
-#         ') of rows.\n')))
-# } else {
-#     cat(bgRed(paste('Chartevent has an unexpected number (', n_chartevents,
-#         ') of rows (expected', E_CHARTEVENTS, ').\n')))
-# }
+E_CHARTEVENTS <- 758355
+if (n_chartevents == E_CHARTEVENTS){
+   cat(green(paste('Chartevent has the expected number (', E_CHARTEVENTS,
+       ') of rows.\n')))
+} else {
+   cat(bgRed(paste('Chartevent has an unexpected number (', n_chartevents,
+       ') of rows (expected', E_CHARTEVENTS, ').\n')))
+}
 
+#view(chartevents)
 # Step 4.2. Arrange the data in the table as you want.
-<...>
+## can separate order of arranging with ','
 
+
+
+chartevents <- chartevents %>% arrange(charttime)
+####head(chartevents)
 # Step 4.3. Select patients admitted during a specified period.
 # Select a range of dates.
 # What would be good to check - top and tail?
-<...>
-
+chartevents_30_40 <- chartevents %>%
+            filter(charttime>=as.Date('2130-01-01') &
+                  charttime<=as.Date('2140-12-31'))
+n_chartevents_30_40 <- nrow(chartevents_03_11)
+cat('The number of entries in chartevents between 2130 and 2140 (inc) is',
+    n_chartevents_30_40, '\n', sep=' ')
+###head(chartevents_03_11)
+###tail(chartevents_03_11)
 # Step 5. Remove bad data.
 # ------------------------------------------------------------------------------
 
 # Step 5.1. Review the dataset and note what kind of faults you might find.
 #           Write some code to test for that fault and apply it to all the
 #           relevant fields.
-<...>
+###n_rows_missing_valueuom <- nrow(chartevents %>% filter(is.na(valueuom)))
+###cat(n_rows_missing_valueuom, 'of', n_chartevents, '(',
+###    round((n_rows_missing_valueuom * 100) / n_chartevents, 2),
+###    '% ) having missing data.\n')
+
+###chartevents <- chartevents %>% filter(!is.na(valueuom))
+###n_rows_missing_valueuom <- nrow(chartevents %>% filter(is.na(valueuom)))
+###n_chartevents <- (nrow(chartevents))
+###cat(n_rows_missing_valueuom, 'of', n_chartevents, '(',
+###    round((n_rows_missing_valueuom * 100) / n_chartevents, 2),
+###    '% ) having missing data.\n')
 
 # Advanced code to do this as a function.
 # .......................................
@@ -142,9 +167,24 @@ head(cptevents)
 # }
 # n_rows_missing_valueuom <- count_na(chartevents, 'valueuom')
 # n_chartevents <- nrow(chartevents)
+count_na <- function(dataf, field) {
+  n_rows <- nrow(dataf)
+  rows_missing <- nrow(dataf %>% filter(is.na(eval(sym(field)))))
+  cat(rows_missing, 'of', n_rows, '(',
+      round((rows_missing * 100) / n_rows, 2),
+      '% ) having missing data.\n')
+  return(rows_missing)
+}
+n_rows_missing_valueuom_function <- count_na(chartevents, 'valueuom')
 
 # And, afterwards, check again.
-<...>
+chartevents <- chartevents %>% filter(!is.na(valueuom))
+n_rows_missing_valueuom_function <- nrow(chartevents %>% filter(is.na(valueuom)))
+n_chartevents <- nrow(chartevents)
+cat(n_rows_missing_valueuom_function, 'of', n_chartevents, '(',
+    round((n_rows_missing_valueuom * 100) / n_chartevents, 2),
+    '% ) having missing data.\n')
+head(chartevents)
 
 # Step 6. Re-organising the data.
 # ------------------------------------------------------------------------------
@@ -152,26 +192,57 @@ head(cptevents)
 # Step 6.1. Get the census/platform/base file.
 # This file will contain one row for every participant in your analysis and
 # contain demographic and analytical data.
-<...>
+n_patients <- nrow(patients)
+cat('The number of patients is', n_patients, '\n', sep=' ')
+E_PATIENTS <- 100
+check_df_rows <- function(rows, finalrows, dfname) {
+  if (rows == finalrows){
+    cat(green(paste(dfname, 'has the expected number (', finalrows,
+                    ') of rows.\n')))
+  } else {
+    cat(bgRed(paste(dfname, 'has an unexpected number (', rows,
+                    ') of rows (expected', finalrows, ').\n')))
+  }
+}
 
+check_df_rows(n_patients, E_PATIENTS, 'Patients')
+head(patients)
+days_per_year <- 365
+
+patients <- patients %>% select(-row_id, -dod_hosp, -dod_ssn)
+patients <- patients %>%
+            mutate(aad = as.numeric(round((dod-dob)/days_per_year, 0)))
+view(patients)
 # Step 6.2. Keep only the useful variables.
 # This makes it easier to work with the table. You can add variables back later
 # by changing the list here and re-running your code (but you may need to tweak
 # code further on in the file).
-<...>
+#<...>
 
 # What about the date of birth and death? Perhaps calculate age at death?
-<...>
+#<...>
 
 # Visualise this.
-<...>
+par(mfrow=c(1,1))
+breaks <- c(0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400)
+hist(patients$aad, 
+     main="Patient death age", 
+     xlab="X axis title",
+     ylab="Frequency",
+     sub="Age at death",
+     breaks = breaks,
+     col=rgb(0.0, 0.0, 1.0, 0.5))
+
 
 # How many are affected by this error?
-<...>
+threshold <- 125
+count(patients)
+count(patients[patients$aad > threshold,])
 
 # Option A: remove bad entries.
 # patients <- patients %>%
 #    filter(age_at_death < threshold)
+patients_old_removed <- patients %>% filter(aad < threshold)
 
 # Option B: correct bad entries.
 <...>

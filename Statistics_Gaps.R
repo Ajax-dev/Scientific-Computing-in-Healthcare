@@ -176,9 +176,9 @@ par(mfrow=c(1,1))
 # ------------------------------------------------------------------------------
 # Intermission - standard deviation.
 
-x <- seq(-4, 4, 0.1)
-n <- 10000
-sample <- rnorm(n, mean=0, sd=1)
+x <- seq(-4, 4, 0.1) # -4 to +4 with steps of 0.1
+n <- 10000 # 10000 datapoints
+sample <- rnorm(n, mean=0, sd=1) 
 
 plot(sample, pch=20, col='darkmagenta', cex=0.1)
 

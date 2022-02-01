@@ -19,10 +19,9 @@
 # Step 1. Load the tidyverse library.
 # ------------------------------------------------------------------------------
 library(crayon)     # Used for coloured console text.
-library(tidyverse)  # Used for the starwars dataset.
+library(tidyverse)  # Used for the dataset.
 
-cat(red("\014\012PMIM102 Exercise - Statistics\n"))
-cat(red("---------------------------------------------------------------\n"))
+cat(red("\014\012PMIM102J Exercise - Wrangling\n---------------------------------------------------------------\n"))
     
 # Step 2. Read data into R.
 # ------------------------------------------------------------------------------
@@ -30,27 +29,43 @@ cat(red("---------------------------------------------------------------\n"))
 # In this case we'll be loading data from a number of CSV files.
 
 # Step 2.1. Load the admissions data.
-<...>
+###admissions = read_csv(file="mimic-iii/admissions.csv")
     
 # Review the data file - what do you notice?
-<...>
+head(admissions)
+
+# Step 2.4. Open the files using a path variable.
+path <- 'mimic-iii'
+admissions <- read_csv(file=paste(path, 'admissions.csv', sep='/'))
+cptevents <- read_csv(file=paste(path, 'cptevents', sep='/'))
+patients <- read_csv(file=paste(path, 'patients', sep='/'))
+d_cpt <- read_csv(file=paste(path, 'd_cpt', sep='/'))
+chartevents <- read_csv(file=paste(path, 'chartevents', sep='/'))
+
+head(admissions)
+# removes row_id
+admissions <- admissions %>% select(-row_id)
+head(admissions)
 
 # Step 2.2. Load the cptevents data file.
-<...>
+cptevents <- read_csv(file="mimic-iii/cptevents.csv")
+
+
 
 # Review the data file - what do you notice?
-<...>
+head(cptevents)
 
 # Step 2.3. Change column data types to the types you think are appropriate.
 # Check with as.tibble() or str().
-<...>
+cptevents <- cptevents %>%
+                mutate(cpt_suffix=as.character(cpt_suffix))
+head(cptevents)
 
 # Extra note.
 # Can you see anything that might be worth simplifying about the file names?
 # Can you remember how we join strings together?
 
-# Step 2.4. Open the files using a path variable.
-<...>
+
 
 # Step 2.5. Get the data dictionary.
 <...>

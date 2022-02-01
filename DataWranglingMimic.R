@@ -258,24 +258,37 @@ patients_old_removed <- patients %>% filter(aad < threshold)
 # ------------------------------------------------------------------------------
 
 # Step 7.1. Get the diagnosis data.
-<...>
+diagnoses <- read_csv(file=paste(path,'diagnoses_icd.csv', sep='/'))
+sample_n(diagnoses, 2)
+diagnoses <- diagnoses %>% select(-row_id)
 
 # Step 7.2. Get the diagnosis dictionary.
-<...>
+dict_icd_diag <- read_csv(file=paste(path, 'd_icd_diagnoses.csv', sep='/'))
+sample_n(dict_icd_diag, 12)
+dict_icd_diag <- dict_icd_diag %>% select(-row_id)
 
 # Step 7.3. Find suitable diagnoses.
 # In reality you will create a table with reference to clinical expertise.
-<...>
+diag_diab <- dict_icd_diag %>% filter(str_detect(short_title, 'diabetes'))
+print(diag_diab)
 
 # What is the problem with this? And how to fix it?
-<...>
+### problem is if diabetes is stored with capital 'D'
+diag_diab <- dict_icd_diag %>% filter(str_detect(short_title, 'diabetes') | str_detect(short_title, 'Diabetes'))
+print(diag_diab)
 
 # There is a tidier (but more advanced) way to do this by specifying a pattern
 # which can get quite precise and complex if you want it to.
-<...>
+diag_diabetes <- dict_icd_diag %>%
+  filter(str_detect(short_title, '[Dd]iabetes'))
+print(diag_diabetes)
 
+## lets try for coronavirus
+diag_pneum <- dict_icd_diag %>% filter(str_detect(long_title, '[Cc]oronavirus'))
+print(diag_pneum)
 # We just need the codes as a vector.
-<...>
+diagcodes_diabetes <- diag_diab[['icd9_code']]
+print(diagcodes_diabetes)
 
 # Now we can extract the diabetes diagnoses from the full list.
 <...>
